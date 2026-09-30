@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sanbot.opensdk.base.TopBaseActivity;
 import com.sanbot.opensdk.beans.FuncConstant;
@@ -193,8 +194,13 @@ public class MainActivity extends TopBaseActivity {
     public void runCmd(final String cmd, final Object... kv) {
         cmdExec.submit(() -> {
             final JSONObject ack = App.get().dispatcher().tablet(cmd, kv);
-            if (!"wheels.drive".equals(cmd) || !ack.optBoolean("ok")) {
+            final boolean ok = ack.optBoolean("ok");
+            if (!"wheels.drive".equals(cmd) || !ok) {
                 ui.post(() -> ((MotorsPage) pages[1]).showResult(cmd, ack.toString()));
+            }
+            if (!ok && !"wheels.drive".equals(cmd)) {
+                final String why = ack.has("error") ? ack.optString("error") : String.valueOf(ack.optJSONObject("result"));
+                ui.post(() -> Toast.makeText(this, cmd + " failed: " + why, Toast.LENGTH_LONG).show());
             }
         });
     }

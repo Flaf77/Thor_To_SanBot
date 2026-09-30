@@ -1,5 +1,6 @@
 package com.thorbridge.sanbot.robot;
 
+import android.content.pm.PackageInfo;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
@@ -62,6 +63,8 @@ import com.thorbridge.sanbot.EventLog;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.List;
 import java.util.Locale;
 
@@ -103,9 +106,13 @@ public class SanbotRobot {
     private final ProjectorManager projector;
     private final ModularMotionManager modular;
 
+    // SDK 2.x talks to the robot's MainService over this local TCP socket (SocketConstant in the SDK).
+    private static final int MAINSERVICE_PORT = 12000;
+
     private final HandlerThread thread = new HandlerThread("robot-poll");
     private Handler handler;
     private volatile boolean serviceConnected;
+    private long startedAt;
 
     // Drive watchdog state
     private volatile boolean driving;
@@ -132,11 +139,13 @@ public class SanbotRobot {
     // ------------------------------------------------------------------ lifecycle
 
     public void start() {
+        startedAt = SystemClock.uptimeMillis();
         thread.start();
         handler = new Handler(thread.getLooper());
         registerListeners();
         handler.post(poller);
         handler.post(watchdog);
+        handler.post(this::listSystemApps);
         st.set(RobotState.G_ROBOT, "sdk", "Sanbot SDK", "managers created, waiting for MainService");
     }
 
@@ -153,6 +162,7 @@ public class SanbotRobot {
     public void onMainServiceConnected() {
         serviceConnected = true;
         st.set(RobotState.G_ROBOT, "sdk", "Sanbot SDK", "connected to MainService");
+        st.set(RobotState.G_ROBOT, "sdk_socket", "MainService socket :" + MAINSERVICE_PORT, "connected");
         EventLog.i(TAG, "Sanbot MainService connected");
         handler.post(new Runnable() {
             @Override
@@ -204,6 +214,38 @@ public class SanbotRobot {
         st.define(RobotState.G_WHEELS, "last_cmd", "Last command");
     }
 
+    /** Why is the SDK not connecting? Checks whether the MainService socket the SDK needs is listening. */
+    private void probeMainService() {
+        long waited = (SystemClock.uptimeMillis() - startedAt) / 1000;
+        String label = "MainService socket :" + MAINSERVICE_PORT;
+        try (Socket s = new Socket()) {
+            s.connect(new InetSocketAddress("127.0.0.1", MAINSERVICE_PORT), 500);
+            if (serviceConnected) return;
+            st.set(RobotState.G_ROBOT, "sdk_socket", label, "listening - SDK handshake pending");
+            st.set(RobotState.G_ROBOT, "sdk", "Sanbot SDK", "socket open but no handshake yet (" + waited + " s)");
+        } catch (Exception e) {
+            st.set(RobotState.G_ROBOT, "sdk_socket", label, "CLOSED (" + e.getMessage() + ")");
+            st.set(RobotState.G_ROBOT, "sdk", "Sanbot SDK", "NOT CONNECTED after " + waited
+                    + " s: robot MainService does not accept SDK 2.x connections (firmware too old / MainService not running)");
+        }
+    }
+
+    private void listSystemApps() {
+        StringBuilder sb = new StringBuilder();
+        try {
+            String me = App.get().getPackageName();
+            for (PackageInfo p : App.get().getPackageManager().getInstalledPackages(0)) {
+                String n = p.packageName.toLowerCase(Locale.US);
+                if (n.equals(me) || !(n.contains("sunbo") || n.contains("qihan") || n.contains("sanbot") || n.contains("hfisone"))) continue;
+                if (sb.length() > 0) sb.append('\n');
+                sb.append(p.packageName).append("  v").append(p.versionName).append(" (").append(p.versionCode).append(')');
+            }
+        } catch (Exception e) {
+            EventLog.e(TAG, "cannot list system apps", e);
+        }
+        st.set(RobotState.G_ROBOT, "system_apps", "Sanbot system apps", sb.length() == 0 ? "none found" : sb.toString());
+    }
+
     private void readStaticInfo() {
         safe("info", () -> {
             st.set(RobotState.G_ROBOT, "main_service_version", "MainService version", sys.getMainServiceVersion());
@@ -232,6 +274,8 @@ public class SanbotRobot {
             if (serviceConnected) {
                 safe("ultrasonic", hw::queryUltronicData);
                 if (pollTick % 2 == 0) safe("gravity", hw::queryGravityData);
+            } else if (pollTick % 6 == 1) {
+                probeMainService();
             }
             handler.postDelayed(this, 500);
         }

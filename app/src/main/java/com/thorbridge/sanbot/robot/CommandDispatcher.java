@@ -106,6 +106,9 @@ public class CommandDispatcher {
     private SanbotRobot robot() {
         SanbotRobot r = app.robot();
         if (r == null) throw new IllegalStateException("Sanbot SDK not attached: open the app on the robot tablet");
+        if (!r.isServiceConnected()) {
+            throw new IllegalStateException("Sanbot SDK not connected to the robot MainService (see 'Robot / SDK' on the Modules page)");
+        }
         return r;
     }
 
