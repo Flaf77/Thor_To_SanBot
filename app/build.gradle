@@ -1,0 +1,53 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.thorbridge.sanbot'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.thorbridge.sanbot'
+        // Sanbot tablet runs Android 6.0.1 (API 23).
+        minSdk 21
+        // Target 22 so all permissions (camera, mic) are granted at install time on the robot.
+        targetSdk 22
+        versionCode 1
+        versionName '1.0.0'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+        disable 'ExpiredTargetSdkVersion', 'OldTargetApi'
+    }
+
+    packaging {
+        resources {
+            excludes += ['META-INF/io.netty.versions.properties', 'META-INF/INDEX.LIST', 'META-INF/DEPENDENCIES']
+            pickFirsts += ['META-INF/*.kotlin_module']
+        }
+    }
+}
+
+dependencies {
+    // Sanbot OpenSDK (bundles netty + kotlin-stdlib inside the .aar).
+    implementation files('libs/SanbotOpenSDK_2.0.1.10.aar')
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.google.code.gson:gson:2.8.9'
+}

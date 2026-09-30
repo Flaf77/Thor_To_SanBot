@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Sanbot SDK activity is an AppCompatActivity, so an AppCompat theme is required. -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">#1C232B</item>
+        <item name="colorPrimaryDark">#101418</item>
+        <item name="colorAccent">#3FA9F5</item>
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:textColorPrimary">#E8EDF2</item>
+    </style>
+</resources>
