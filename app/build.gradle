@@ -46,8 +46,9 @@ android {
 }
 
 dependencies {
-    // Sanbot OpenSDK (bundles netty + kotlin-stdlib inside the .aar).
-    implementation files('libs/SanbotOpenSDK_2.0.1.10.aar')
+    // Qihan/Sanbot OpenSDK 1.1.8 (AIDL binding to com.sunbo.main MainService 1.5.x, 2017 firmware).
+    // SDK 2.x does not work on this firmware: it needs a MainService socket on port 12000.
+    implementation files('libs/QihanOpenSDK_1.1.8.0.aar')
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.google.code.gson:gson:2.8.9'
 }

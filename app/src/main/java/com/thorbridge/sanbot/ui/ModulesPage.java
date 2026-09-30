@@ -19,6 +19,7 @@ import com.thorbridge.sanbot.media.AndroidCameraHub;
 import com.thorbridge.sanbot.media.H264Decoder;
 import com.thorbridge.sanbot.media.MicStreamer;
 import com.thorbridge.sanbot.robot.RobotState;
+import com.thorbridge.sanbot.robot.SanbotRobot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -208,7 +209,7 @@ public class ModulesPage extends Page {
         LinearLayout card = Ui.card(c, "Speaker & voice");
         final EditText text = Ui.edit(c, "Text for the robot to say", "Hello, I am connected to Thor.", false);
         card.addView(text, Ui.matchWidth());
-        final String[] langs = {"en", "de", "fr", "es", "it", "pt", "pl", "tr", "da", "ja", "ko", "zh", "ar"};
+        final String[] langs = SanbotRobot.SPEAK_LANGS;
         final Spinner lang = Ui.spinner(c, langs);
         LinearLayout row = Ui.hbox(c);
         row.addView(lang);

@@ -15,7 +15,7 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.sanbot.opensdk.function.beans.EmotionsType;
+import com.qihancloud.opensdk.function.beans.EmotionsType;
 import com.thorbridge.sanbot.MainActivity;
 import com.thorbridge.sanbot.robot.RobotState;
 import com.thorbridge.sanbot.robot.SanbotRobot;
@@ -60,7 +60,6 @@ public class MotorsPage extends Page {
         left.addView(headCard(c));
         left.addView(armsCard(c));
         right.addView(wheelsCard(c));
-        right.addView(locksCard(c));
         left.addView(actuatorsCard(c));
         return sv;
     }
@@ -127,11 +126,11 @@ public class MotorsPage extends Page {
         String[][] layout = {
                 {"left_forward", "forward", "right_forward"},
                 {"turn_left", "STOP", "turn_right"},
-                {"left_translation", "back", "right_translation"}};
+                {"left_back", "back", "right_back"}};
         String[][] labels = {
                 {"Fwd-left", "Forward", "Fwd-right"},
                 {"Turn left", "STOP", "Turn right"},
-                {"Strafe left", "Back", "Strafe right"}};
+                {"Back-left", "Back", "Back-right"}};
         for (int r = 0; r < 3; r++) {
             for (int col = 0; col < 3; col++) {
                 String action = layout[r][col];
@@ -202,21 +201,6 @@ public class MotorsPage extends Page {
     private void stopRepeat() {
         if (driveRepeat != null) ui.removeCallbacks(driveRepeat);
         driveRepeat = null;
-    }
-
-    // ------------------------------------------------------------------ locks
-
-    private View locksCard(Context c) {
-        LinearLayout card = withState(c, RobotState.G_LOCKS, "Motor lock / protection");
-        final Spinner part = Ui.spinner(c, SanbotRobot.LOCK_PARTS);
-        card.addView(part);
-        LinearLayout row = Ui.hbox(c);
-        row.addView(Ui.button(c, "Lock", v -> act.runCmd("motor.lock", "part", part.getSelectedItem(), "lock", true)));
-        row.addView(Ui.button(c, "Unlock", v -> act.runCmd("motor.lock", "part", part.getSelectedItem(), "lock", false)));
-        row.addView(Ui.button(c, "Protect on", v -> act.runCmd("motor.defend", "part", part.getSelectedItem(), "on", true)));
-        row.addView(Ui.button(c, "Protect off", v -> act.runCmd("motor.defend", "part", part.getSelectedItem(), "on", false)));
-        card.addView(row);
-        return card;
     }
 
     // ------------------------------------------------------------------ LEDs, light, projector, emotion

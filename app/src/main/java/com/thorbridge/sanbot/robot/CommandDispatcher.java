@@ -28,7 +28,7 @@ public class CommandDispatcher {
             "head.absolute", "head.locate", "head.relative", "head.center",
             "arm.absolute", "arm.relative", "arm.move",
             "wheels.drive", "wheels.turn", "wheels.distance",
-            "wander", "follow", "charge", "motor.lock", "motor.defend"));
+            "wander", "follow", "charge"));
 
     public static final String[] COMMANDS = {
             "ping", "help", "get_state", "get_info",
@@ -37,10 +37,10 @@ public class CommandDispatcher {
             "arm.absolute {side,angle,speed?}", "arm.relative {side,direction,angle,speed?}", "arm.move {side,direction,speed?}",
             "wheels.drive {action,speed?,timeout_ms?}", "wheels.turn {direction,angle,speed?}",
             "wheels.distance {direction,cm,speed?}", "wheels.stop", "stop_all",
-            "speak {text,lang?,speed?,intonation?}", "speak.stop", "speech.wakeup", "speech.sleep",
+            "speak {text,lang?(en|zh),speed?,intonation?}", "speak.stop", "speech.wakeup", "speech.sleep",
             "led {part,mode,delay?,random?}", "white_light {on,level?}", "emotion {name}", "projector {on}",
-            "motor.lock {part,lock}", "motor.defend {part,on}", "wander {on}", "follow {on}", "charge {on}",
-            "query.ultrasonic", "query.pir", "volume {percent}", "screen.text {text}",
+            "wander {on}", "follow {on}", "charge {on}",
+            "volume {percent}", "screen.text {text}",
     };
 
     private final App app;
@@ -187,20 +187,12 @@ public class CommandDispatcher {
                 return robot().emotion(req(a, "name"));
             case "projector":
                 return robot().projector(a.optBoolean("on"));
-            case "motor.lock":
-                return robot().motorLock(req(a, "part"), a.optBoolean("lock"));
-            case "motor.defend":
-                return robot().motorDefend(req(a, "part"), a.optBoolean("on"));
             case "wander":
                 return robot().wander(a.optBoolean("on"));
             case "follow":
                 return robot().follow(a.optBoolean("on"));
             case "charge":
                 return robot().autoCharge(a.optBoolean("on"));
-            case "query.ultrasonic":
-                return robot().queryUltrasonic();
-            case "query.pir":
-                return robot().queryPir();
 
             case "volume": {
                 AudioManager am = (AudioManager) app.getSystemService(Context.AUDIO_SERVICE);

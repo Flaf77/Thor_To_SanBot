@@ -17,7 +17,7 @@ flowchart LR
 ## How the tablet talks to the hardware
 
 * The tablet does not drive the motors or read the sensors directly. Qihan's system service (**MainService**, part of the robot firmware) talks to the microcontrollers in the head and body. The firmware is the "Robot version V6.0rc4" in *Settings > About*. The "Robot model: allwinner" line refers to the tablet's Allwinner ARM chipset.
-* Apps use the **Sanbot OpenSDK** (`app/libs/SanbotOpenSDK_2.0.1.10.aar`). The SDK gives the app "managers" (`HardWareManager`, `HeadMotionManager`, `WingMotionManager` for the arms, `WheelMotionManager`, `SpeechManager`, `HDCameraManager`, `SystemManager`, and others). These managers talk to MainService.
+* Apps use the **Qihan/Sanbot OpenSDK 1.1.8** (`app/libs/QihanOpenSDK_1.1.8.0.aar`). It binds to MainService (`com.sunbo.main` 1.5.x, 2017 firmware). The newer `SanbotOpenSDK_2.0.1.10.aar` does not work on this firmware: it expects a MainService socket on port 12000. The SDK gives the app "managers" (`HardWareManager`, `HeadMotionManager`, `HandMotionManager` for the arms, `WheelMotionManager`, `SpeechManager`, `MediaManager` for the HD camera, `SystemManager`, and others). These managers talk to MainService.
 * **Sanbot only delivers sensor callbacks to the app in the foreground.** Keep this app open on the robot. It keeps the screen on, and it can also start automatically at boot.
 * The manifest sets `FORBID_TOUCH`, `FORBID_PIR`, `FORBID_WAKE_RESPONSE` and `RECOGNIZE_MODE=1`. With these set, Sanbot's built-in reactions stay quiet, and Thor gets touch, PIR and speech events instead.
 
@@ -25,8 +25,8 @@ flowchart LR
 
 | Page | Contents |
 |---|---|
-| **Modules & sensors** | Live HD head-camera preview (SDK, H.264), tablet cameras (Android), microphone level meter, speaker/TTS test. Also every sensor with its live value and age: touch (13 zones), front/back PIR, IR distance, ultrasonic, gyroscope/gravity, obstacle sensors, sound-source angle, speech recognizer, face recognition, battery/charging, buttons, MCU link. |
-| **Motors** | State of head pan/tilt, arms, wheels (MCU status, current action, watchdog), motor locks/protection, LEDs/light/projector/face. Manual controls: sliders, hold-to-drive pad, turn-by-angle, move-by-distance. A checkbox controls whether Thor may move the motors. |
+| **Modules & sensors** | Live HD head-camera preview (SDK, H.264), tablet cameras (Android), microphone level meter, speaker/TTS test. Also every sensor with its live value and age: touch (13 zones), front/back PIR, IR distance, gyroscope, sound-source angle, speech recognizer, face recognition, battery/charging, safety alarm. |
+| **Motors** | State of head pan/tilt, arms, wheels (current action, watchdog), LEDs/light/projector/face. Manual controls: sliders, hold-to-drive pad, turn-by-angle, move-by-distance. A checkbox controls whether Thor may move the motors. |
 | **Connection to Thor** | The tablet's IP addresses per interface (Ethernet / USB tethering / Wi-Fi), a client mode ("connect to Thor IP"), a server mode (Thor connects to the tablet), auto-discovered Thors, token, state rate, active links, and a log. |
 
 The **E-STOP** button on the top bar is always visible. It stops all motion and blocks motion commands from Thor until you release it.
@@ -161,12 +161,12 @@ The control channel is TCP on port 9100. Messages are **newline-delimited JSON**
 | Head | `head.absolute {pan?,tilt?}`, `head.locate {pan,tilt,lock?}`, `head.relative {direction,angle}`, `head.center`, `head.stop` |
 | Arms | `arm.absolute {side,angle,speed?}`, `arm.relative {side,direction,angle,speed?}`, `arm.move {side,direction(up/down/stop/reset),speed?}` |
 | Wheels | `wheels.drive {action,speed?,timeout_ms?}`, `wheels.turn {direction,angle,speed?}`, `wheels.distance {direction,cm,speed?}`, `wheels.stop`, `stop_all` |
-| Voice | `speak {text,lang?,speed?,intonation?}`, `speak.stop`, `speech.wakeup`, `speech.sleep`, `volume {percent}` |
-| Other | `led {part,mode}`, `white_light {on,level?}`, `emotion {name}`, `projector {on}`, `motor.lock {part,lock}`, `motor.defend {part,on}`, `wander {on}`, `follow {on}`, `charge {on}` (drive to the dock), `query.ultrasonic`, `query.pir`, `screen.text {text}` |
+| Voice | `speak {text,lang?(en/zh),speed?,intonation?}`, `speak.stop`, `speech.wakeup`, `speech.sleep`, `volume {percent}` |
+| Other | `led {part,mode}`, `white_light {on,level?}`, `emotion {name}`, `projector {on}`, `wander {on}`, `follow {on}`, `charge {on}` (drive to the dock), `screen.text {text}` |
 
-**Events:** `touch`, `pir`, `voice_locate` (sound angle), `speech` (recognized sentence), `speech_partial`, `wake`, `speak_status`, `faces`, `obstacle`, `obstacle_status`, `wheel_obstacle`, `key`, `charge_status`, `wake_signal`, `estop`.
+**Events:** `touch`, `pir`, `voice_locate` (sound angle), `speech` (recognized sentence), `wake`, `speak_status`, `faces`, `alarm`, `estop`.
 
-**Wheel actions:** `forward`, `back`, `left`, `right`, `left_forward`, `right_forward`, `left_back`, `right_back`, `left_translation`, `right_translation`, `turn_left`, `turn_right`, `stop`.
+**Wheel actions:** `forward`, `back`, `left`, `right`, `left_forward`, `right_forward`, `left_back`, `right_back`, `turn_left`, `turn_right`, `stop`.
 
 **Ranges (Sanbot Elf):**
 
@@ -209,7 +209,7 @@ ffmpeg -i voice.wav -f s16le -ar 16000 -ac 1 - | nc -q1 TABLET 9103
 ## Project layout
 
 ```
-app/libs/SanbotOpenSDK_2.0.1.10.aar     Sanbot OpenSDK
+app/libs/QihanOpenSDK_1.1.8.0.aar       Qihan/Sanbot OpenSDK (matches MainService com.sunbo.main 1.5.x)
 app/src/main/java/com/thorbridge/sanbot/
   MainActivity.java                     Sanbot TopBaseActivity, top bar, E-STOP, pages
   robot/SanbotRobot.java                every SDK call + callback (hardware abstraction)

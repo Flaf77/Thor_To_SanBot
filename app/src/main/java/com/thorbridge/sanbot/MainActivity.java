@@ -13,17 +13,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sanbot.opensdk.base.TopBaseActivity;
-import com.sanbot.opensdk.beans.FuncConstant;
-import com.sanbot.opensdk.function.unit.HDCameraManager;
-import com.sanbot.opensdk.function.unit.HardWareManager;
-import com.sanbot.opensdk.function.unit.HeadMotionManager;
-import com.sanbot.opensdk.function.unit.ModularMotionManager;
-import com.sanbot.opensdk.function.unit.ProjectorManager;
-import com.sanbot.opensdk.function.unit.SpeechManager;
-import com.sanbot.opensdk.function.unit.SystemManager;
-import com.sanbot.opensdk.function.unit.WheelMotionManager;
-import com.sanbot.opensdk.function.unit.WingMotionManager;
+import com.qihancloud.opensdk.base.TopBaseActivity;
+import com.qihancloud.opensdk.beans.FuncConstant;
+import com.qihancloud.opensdk.function.unit.HandMotionManager;
+import com.qihancloud.opensdk.function.unit.HardWareManager;
+import com.qihancloud.opensdk.function.unit.HeadMotionManager;
+import com.qihancloud.opensdk.function.unit.MediaManager;
+import com.qihancloud.opensdk.function.unit.ModularMotionManager;
+import com.qihancloud.opensdk.function.unit.ProjectorManager;
+import com.qihancloud.opensdk.function.unit.SpeechManager;
+import com.qihancloud.opensdk.function.unit.SystemManager;
+import com.qihancloud.opensdk.function.unit.WheelMotionManager;
 import com.thorbridge.sanbot.net.BridgeService;
 import com.thorbridge.sanbot.robot.RobotState;
 import com.thorbridge.sanbot.robot.SanbotRobot;
@@ -54,21 +54,26 @@ public class MainActivity extends TopBaseActivity {
     private Button estop;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        register(MainActivity.class);
+    public void onCreate(Bundle savedInstanceState) {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
 
         App app = App.get();
+        MediaManager media = null;
+        try {
+            media = (MediaManager) getUnitManager(FuncConstant.MEDIA_MANAGER);
+        } catch (Throwable t) {
+            EventLog.e("main", "HD camera manager unavailable (libuvcNative)", t);
+        }
         try {
             robot = new SanbotRobot(app.state(),
                     (HardWareManager) getUnitManager(FuncConstant.HARDWARE_MANAGER),
                     (SystemManager) getUnitManager(FuncConstant.SYSTEM_MANAGER),
                     (HeadMotionManager) getUnitManager(FuncConstant.HEADMOTION_MANAGER),
-                    (WingMotionManager) getUnitManager(FuncConstant.WINGMOTION_MANAGER),
+                    (HandMotionManager) getUnitManager(FuncConstant.HANDMOTION_MANAGER),
                     (WheelMotionManager) getUnitManager(FuncConstant.WHEELMOTION_MANAGER),
                     (SpeechManager) getUnitManager(FuncConstant.SPEECH_MANAGER),
-                    (HDCameraManager) getUnitManager(FuncConstant.HDCAMERA_MANAGER),
+                    media,
                     (ProjectorManager) getUnitManager(FuncConstant.PROJECTOR_MANAGER),
                     (ModularMotionManager) getUnitManager(FuncConstant.MODULARMOTION_MANAGER));
             robot.start();
@@ -90,7 +95,7 @@ public class MainActivity extends TopBaseActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         ui.removeCallbacksAndMessages(null);
         if (pages != null) for (Page p : pages) p.onDestroy();
         App.get().setRobot(null);

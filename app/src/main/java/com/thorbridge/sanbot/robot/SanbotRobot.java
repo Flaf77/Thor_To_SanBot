@@ -5,73 +5,55 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 
-import com.sanbot.opensdk.beans.OperationResult;
-import com.sanbot.opensdk.function.beans.EmotionsType;
-import com.sanbot.opensdk.function.beans.FaceRecognizeBean;
-import com.sanbot.opensdk.function.beans.LED;
-import com.sanbot.opensdk.function.beans.SpeakOption;
-import com.sanbot.opensdk.function.beans.StreamOption;
-import com.sanbot.opensdk.function.beans.hardware.MotorDefend;
-import com.sanbot.opensdk.function.beans.hardware.MotorLock;
-import com.sanbot.opensdk.function.beans.headmotion.AbsoluteAngleHeadMotion;
-import com.sanbot.opensdk.function.beans.headmotion.LocateAbsoluteAngleHeadMotion;
-import com.sanbot.opensdk.function.beans.headmotion.RelativeAngleHeadMotion;
-import com.sanbot.opensdk.function.beans.speech.Grammar;
-import com.sanbot.opensdk.function.beans.speech.RecognizeTextBean;
-import com.sanbot.opensdk.function.beans.speech.SpeakStatus;
-import com.sanbot.opensdk.function.beans.wheelmotion.DistanceWheelMotion;
-import com.sanbot.opensdk.function.beans.wheelmotion.NoAngleWheelMotion;
-import com.sanbot.opensdk.function.beans.wheelmotion.RelativeAngleWheelMotion;
-import com.sanbot.opensdk.function.beans.wing.AbsoluteAngleWingMotion;
-import com.sanbot.opensdk.function.beans.wing.NoAngleWingMotion;
-import com.sanbot.opensdk.function.beans.wing.RelativeAngleWingMotion;
-import com.sanbot.opensdk.function.unit.HDCameraManager;
-import com.sanbot.opensdk.function.unit.HardWareManager;
-import com.sanbot.opensdk.function.unit.HeadMotionManager;
-import com.sanbot.opensdk.function.unit.ModularMotionManager;
-import com.sanbot.opensdk.function.unit.ProjectorManager;
-import com.sanbot.opensdk.function.unit.SpeechManager;
-import com.sanbot.opensdk.function.unit.SystemManager;
-import com.sanbot.opensdk.function.unit.WheelMotionManager;
-import com.sanbot.opensdk.function.unit.WingMotionManager;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.ChargeStatusListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.GravityDataListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.GyroscopeListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.HandStatusListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.IWakeSignalListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.InfrareListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.McuConnectStatusListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.MotorListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.ObstacleListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.PIRListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.TouchSensorListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.UltrasonicListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.VoiceLocateListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.WheelStatusListener;
-import com.sanbot.opensdk.function.unit.interfaces.hardware.WhiteLightBrightnessListener;
-import com.sanbot.opensdk.function.unit.interfaces.media.FaceRecognizeListener;
-import com.sanbot.opensdk.function.unit.interfaces.media.MediaStreamListener;
-import com.sanbot.opensdk.function.unit.interfaces.speech.RecognizeListener;
-import com.sanbot.opensdk.function.unit.interfaces.speech.SpeakListener;
-import com.sanbot.opensdk.function.unit.interfaces.speech.WakenListener;
-import com.sanbot.opensdk.function.unit.interfaces.system.KeyStatusListener;
-import com.sanbot.opensdk.function.unit.interfaces.system.ObstacleStatusListener;
-import com.sanbot.opensdk.function.unit.interfaces.system.WheelObstacleStatusListener;
+import com.qihancloud.opensdk.beans.OperationResult;
+import com.qihancloud.opensdk.function.beans.EmotionsType;
+import com.qihancloud.opensdk.function.beans.FaceRecognizeBean;
+import com.qihancloud.opensdk.function.beans.LED;
+import com.qihancloud.opensdk.function.beans.SpeakOption;
+import com.qihancloud.opensdk.function.beans.StreamOption;
+import com.qihancloud.opensdk.function.beans.handmotion.AbsoluteAngleHandMotion;
+import com.qihancloud.opensdk.function.beans.handmotion.NoAngleHandMotion;
+import com.qihancloud.opensdk.function.beans.handmotion.RelativeAngleHandMotion;
+import com.qihancloud.opensdk.function.beans.headmotion.AbsoluteAngleHeadMotion;
+import com.qihancloud.opensdk.function.beans.headmotion.LocateAbsoluteAngleHeadMotion;
+import com.qihancloud.opensdk.function.beans.headmotion.RelativeAngleHeadMotion;
+import com.qihancloud.opensdk.function.beans.speech.Grammar;
+import com.qihancloud.opensdk.function.beans.wheelmotion.DistanceWheelMotion;
+import com.qihancloud.opensdk.function.beans.wheelmotion.NoAngleWheelMotion;
+import com.qihancloud.opensdk.function.beans.wheelmotion.RelativeAngleWheelMotion;
+import com.qihancloud.opensdk.function.unit.HandMotionManager;
+import com.qihancloud.opensdk.function.unit.HardWareManager;
+import com.qihancloud.opensdk.function.unit.HeadMotionManager;
+import com.qihancloud.opensdk.function.unit.MediaManager;
+import com.qihancloud.opensdk.function.unit.ModularMotionManager;
+import com.qihancloud.opensdk.function.unit.ProjectorManager;
+import com.qihancloud.opensdk.function.unit.SpeechManager;
+import com.qihancloud.opensdk.function.unit.SystemManager;
+import com.qihancloud.opensdk.function.unit.WheelMotionManager;
+import com.qihancloud.opensdk.function.unit.interfaces.IDarlingListener;
+import com.qihancloud.opensdk.function.unit.interfaces.hardware.GyroscopeListener;
+import com.qihancloud.opensdk.function.unit.interfaces.hardware.InfrareListener;
+import com.qihancloud.opensdk.function.unit.interfaces.hardware.PIRListener;
+import com.qihancloud.opensdk.function.unit.interfaces.hardware.TouchSensorListener;
+import com.qihancloud.opensdk.function.unit.interfaces.hardware.VoiceLocateListener;
+import com.qihancloud.opensdk.function.unit.interfaces.media.FaceRecognizeListener;
+import com.qihancloud.opensdk.function.unit.interfaces.media.MediaStreamListener;
+import com.qihancloud.opensdk.function.unit.interfaces.speech.RecognizeListener;
+import com.qihancloud.opensdk.function.unit.interfaces.speech.SpeakListener;
+import com.qihancloud.opensdk.function.unit.interfaces.speech.WakenListener;
 import com.thorbridge.sanbot.App;
 import com.thorbridge.sanbot.EventLog;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.List;
 import java.util.Locale;
 
 import static com.thorbridge.sanbot.robot.RobotState.obj;
 
 /**
- * Hardware abstraction over the Sanbot OpenSDK managers (SDK 2.0.1.x, Sanbot Elf / S1).
+ * Hardware abstraction over the Qihan/Sanbot OpenSDK 1.1.8 managers (MainService com.sunbo.main 1.5.x, Sanbot Elf).
  * Every SDK call and every SDK callback in the app goes through this class.
  */
 public class SanbotRobot {
@@ -99,15 +81,15 @@ public class SanbotRobot {
     private final HardWareManager hw;
     private final SystemManager sys;
     private final HeadMotionManager head;
-    private final WingMotionManager wing;
+    private final HandMotionManager hand;
     private final WheelMotionManager wheel;
     private final SpeechManager speech;
-    private final HDCameraManager hdCam;
+    private final MediaManager hdCam;
     private final ProjectorManager projector;
     private final ModularMotionManager modular;
 
-    // SDK 2.x talks to the robot's MainService over this local TCP socket (SocketConstant in the SDK).
-    private static final int MAINSERVICE_PORT = 12000;
+    // SDK 1.1.8 does not report the HD stream size; this is the Elf head camera main stream.
+    private static final int HD_W = 1280, HD_H = 720;
 
     private final HandlerThread thread = new HandlerThread("robot-poll");
     private Handler handler;
@@ -116,18 +98,19 @@ public class SanbotRobot {
 
     // Drive watchdog state
     private volatile boolean driving;
-    private volatile byte driveAction = NoAngleWheelMotion.ACTION_STOP;
+    private volatile byte driveAction = NoAngleWheelMotion.ACTION_STOP_RUN;
     private volatile int driveSpeed;
     private volatile long driveDeadline;
 
+    /** hdCam may be null if the camera native library could not be loaded. */
     public SanbotRobot(RobotState state, HardWareManager hw, SystemManager sys, HeadMotionManager head,
-                       WingMotionManager wing, WheelMotionManager wheel, SpeechManager speech,
-                       HDCameraManager hdCam, ProjectorManager projector, ModularMotionManager modular) {
+                       HandMotionManager hand, WheelMotionManager wheel, SpeechManager speech,
+                       MediaManager hdCam, ProjectorManager projector, ModularMotionManager modular) {
         this.st = state;
         this.hw = hw;
         this.sys = sys;
         this.head = head;
-        this.wing = wing;
+        this.hand = hand;
         this.wheel = wheel;
         this.speech = speech;
         this.hdCam = hdCam;
@@ -161,20 +144,11 @@ public class SanbotRobot {
 
     public void onMainServiceConnected() {
         serviceConnected = true;
-        st.set(RobotState.G_ROBOT, "sdk", "Sanbot SDK", "connected to MainService");
-        st.set(RobotState.G_ROBOT, "sdk_socket", "MainService socket :" + MAINSERVICE_PORT, "connected");
+        st.set(RobotState.G_ROBOT, "sdk", "Sanbot SDK", "connected to MainService (SDK 1.1.8)");
         EventLog.i(TAG, "Sanbot MainService connected");
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                readStaticInfo();
-                safe("queryPir", () -> {
-                    hw.queryPirStatus(1);
-                    hw.queryPirStatus(2);
-                });
-                safe("queryWhiteLight", hw::queryWhiteLightBrightness);
-                App.get().hdCamera().ensureOpen();
-            }
+        handler.post(() -> {
+            readStaticInfo();
+            App.get().hdCamera().ensureOpen();
         });
     }
 
@@ -193,41 +167,28 @@ public class SanbotRobot {
         st.define(RobotState.G_IMU, "gyro_x", "Gyro / heading X");
         st.define(RobotState.G_IMU, "gyro_y", "Gyro Y");
         st.define(RobotState.G_IMU, "gyro_z", "Gyro Z");
-        st.define(RobotState.G_IMU, "gravity", "Gravity sensor");
         st.define(RobotState.G_AUDIO, "voice_angle", "Sound source angle (mic array)");
-        st.define(RobotState.G_SPEECH, "listening", "Recognizer");
+        st.define(RobotState.G_SPEECH, "awake", "Wake state");
         st.define(RobotState.G_SPEECH, "last_text", "Last recognized text");
         st.define(RobotState.G_SPEECH, "speaking", "TTS status");
-        st.define(RobotState.G_OBSTACLE, "front_obstacle", "Obstacle (IR bumper)");
         st.define(RobotState.G_FACE, "count", "Faces seen");
         st.define(RobotState.G_HEAD, "pan_cmd", "Pan (horizontal) commanded");
         st.define(RobotState.G_HEAD, "tilt_cmd", "Tilt (vertical) commanded");
         st.define(RobotState.G_HEAD, "last_cmd", "Last command");
         st.define(RobotState.G_ARMS, "left_cmd", "Left arm commanded angle");
         st.define(RobotState.G_ARMS, "right_cmd", "Right arm commanded angle");
-        st.define(RobotState.G_ARMS, "hand_status", "Arm status (MCU)");
         st.define(RobotState.G_ARMS, "last_cmd", "Last command");
-        st.define(RobotState.G_WHEELS, "status", "Wheel status (MCU)");
         st.define(RobotState.G_WHEELS, "action", "Current action");
         st.define(RobotState.G_WHEELS, "speed", "Speed");
         st.define(RobotState.G_WHEELS, "watchdog", "Drive watchdog");
         st.define(RobotState.G_WHEELS, "last_cmd", "Last command");
     }
 
-    /** Why is the SDK not connecting? Checks whether the MainService socket the SDK needs is listening. */
-    private void probeMainService() {
+    private void reportWaiting() {
         long waited = (SystemClock.uptimeMillis() - startedAt) / 1000;
-        String label = "MainService socket :" + MAINSERVICE_PORT;
-        try (Socket s = new Socket()) {
-            s.connect(new InetSocketAddress("127.0.0.1", MAINSERVICE_PORT), 500);
-            if (serviceConnected) return;
-            st.set(RobotState.G_ROBOT, "sdk_socket", label, "listening - SDK handshake pending");
-            st.set(RobotState.G_ROBOT, "sdk", "Sanbot SDK", "socket open but no handshake yet (" + waited + " s)");
-        } catch (Exception e) {
-            st.set(RobotState.G_ROBOT, "sdk_socket", label, "CLOSED (" + e.getMessage() + ")");
-            st.set(RobotState.G_ROBOT, "sdk", "Sanbot SDK", "NOT CONNECTED after " + waited
-                    + " s: robot MainService does not accept SDK 2.x connections (firmware too old / MainService not running)");
-        }
+        if (waited < 5 || serviceConnected) return;
+        st.set(RobotState.G_ROBOT, "sdk", "Sanbot SDK", "NOT CONNECTED after " + waited
+                + " s: com.sunbo.main did not accept the binding (is MainService running?)");
     }
 
     private void listSystemApps() {
@@ -271,12 +232,7 @@ public class SanbotRobot {
                     st.set(RobotState.G_POWER, "battery_status", "Power source", t);
                 });
             }
-            if (serviceConnected) {
-                safe("ultrasonic", hw::queryUltronicData);
-                if (pollTick % 2 == 0) safe("gravity", hw::queryGravityData);
-            } else if (pollTick % 6 == 1) {
-                probeMainService();
-            }
+            if (!serviceConnected && pollTick % 6 == 1) reportWaiting();
             handler.postDelayed(this, 500);
         }
     };
@@ -300,11 +256,6 @@ public class SanbotRobot {
             public void onTouch(int part) {
                 touch(part, true);
             }
-
-            @Override
-            public void onTouch(int part, boolean pressed) {
-                touch(part, pressed);
-            }
         });
         hw.setOnHareWareListener(new PIRListener() {
             @Override
@@ -321,29 +272,12 @@ public class SanbotRobot {
                 st.set(RobotState.G_IR, "ir_" + part, "IR #" + part + " distance", distance);
             }
         });
-        hw.setOnHareWareListener(new UltrasonicListener() {
-            @Override
-            public void onUltrasonicResult(int num, int data) {
-                st.set(RobotState.G_ULTRASONIC, "us_" + num, "Ultrasonic #" + num, data == 65535 ? "error / no echo" : data);
-            }
-        });
         hw.setOnHareWareListener(new GyroscopeListener() {
-            @Override
-            public void gyroscopeCheckResult(boolean a, boolean b) {
-                st.set(RobotState.G_IMU, "self_check", "Gyro self-check", a + " / " + b);
-            }
-
             @Override
             public void gyroscopeData(float x, float y, float z) {
                 st.set(RobotState.G_IMU, "gyro_x", "Gyro / heading X", x);
                 st.set(RobotState.G_IMU, "gyro_y", "Gyro Y", y);
                 st.set(RobotState.G_IMU, "gyro_z", "Gyro Z", z);
-            }
-        });
-        hw.setOnHareWareListener(new GravityDataListener() {
-            @Override
-            public void onGravityDataResult(float v) {
-                st.set(RobotState.G_IMU, "gravity", "Gravity sensor", v);
             }
         });
         hw.setOnHareWareListener(new VoiceLocateListener() {
@@ -353,84 +287,11 @@ public class SanbotRobot {
                 st.event("voice_locate", obj("angle", angle));
             }
         });
-        hw.setOnHareWareListener(new ObstacleListener() {
+        sys.setOnIDarlingListener(new IDarlingListener() {
             @Override
-            public void onObstacleStatus(boolean blocked) {
-                st.set(RobotState.G_OBSTACLE, "front_obstacle", "Obstacle (IR bumper)", blocked ? "BLOCKED" : "clear");
-                st.event("obstacle", obj("blocked", blocked));
-            }
-        });
-        hw.setOnHareWareListener(new IWakeSignalListener() {
-            @Override
-            public void onWakeSignal() {
-                st.set(RobotState.G_MISC, "wake_signal", "MCU wake signal", "received");
-                st.event("wake_signal", obj());
-            }
-        });
-        hw.setOnHareWareListener(new HandStatusListener() {
-            @Override
-            public void onHandStatus(byte part, byte status) {
-                st.set(RobotState.G_ARMS, "hand_status", "Arm status (MCU)", "part " + part + " status " + status);
-            }
-        });
-        hw.setOnHareWareListener(new WheelStatusListener() {
-            @Override
-            public void onWheelStatus(int s) {
-                st.set(RobotState.G_WHEELS, "status", "Wheel status (MCU)", s == 0 ? "stopped" : "running (" + s + ")");
-            }
-        });
-        hw.setOnHareWareListener(new ChargeStatusListener() {
-            @Override
-            public void onChargeStatus(int a, int b) {
-                st.set(RobotState.G_POWER, "charge_event", "Charge status event", a + " / " + b);
-                st.event("charge_status", obj("a", a, "b", b));
-            }
-        });
-        hw.setOnHareWareListener(new McuConnectStatusListener() {
-            @Override
-            public void onMcuStatus(int a, int b) {
-                st.set(RobotState.G_MISC, "mcu_link", "MCU link status", a + " / " + b);
-            }
-        });
-        hw.setOnHareWareListener(new WhiteLightBrightnessListener() {
-            @Override
-            public void onWhiteLightBrightness(byte level) {
-                st.set(RobotState.G_ACTUATORS, "white_light_level", "Forehead white light level", (int) level);
-            }
-        });
-        hw.setOnHareWareListener(new MotorListener() {
-            @Override
-            public void onMotorCheckResult(int a, int b) {
-                st.set(RobotState.G_LOCKS, "motor_check", "Motor self-check", a + " / " + b);
-            }
-        });
-
-        sys.setKeyStatusListener(new KeyStatusListener() {
-            @Override
-            public void onKeyStatus(int key, String status) {
-                st.set(RobotState.G_MISC, "key_" + key, "Button " + key, status);
-                st.event("key", obj("key", key, "status", status));
-            }
-        });
-        sys.setOnObstacleStatusListener(new ObstacleStatusListener() {
-            @Override
-            public void onObstacleStatus(int which, int status) {
-                st.set(RobotState.G_OBSTACLE, "obstacle_" + which, "Obstacle sensor " + which, status);
-                st.event("obstacle_status", obj("which", which, "status", status));
-            }
-        });
-        sys.setOnWheelObstacleStatusListener(new WheelObstacleStatusListener() {
-            @Override
-            public void onWheelObstacleStatus(int which, int status) {
-                st.set(RobotState.G_OBSTACLE, "wheel_obstacle_" + which, "Wheel obstacle " + which, status);
-                st.event("wheel_obstacle", obj("which", which, "status", status));
-            }
-        });
-
-        wheel.setWheelMotionListener(new WheelMotionManager.WheelMotionListener() {
-            @Override
-            public void onWheelStatus(String s) {
-                st.set(RobotState.G_WHEELS, "motion_event", "Motion event", s);
+            public void onAlarm(int code) {
+                st.set(RobotState.G_MISC, "alarm", "Safety alarm", code);
+                st.event("alarm", obj("code", code));
             }
         });
 
@@ -445,29 +306,8 @@ public class SanbotRobot {
             }
 
             @Override
-            public void onRecognizeText(RecognizeTextBean b) {
-                st.set(RobotState.G_SPEECH, "partial_text", "Partial text", b.getText());
-                st.event("speech_partial", obj("text", b.getText(), "last", b.isLast()));
-            }
-
-            @Override
             public void onRecognizeVolume(int v) {
                 st.set(RobotState.G_AUDIO, "asr_volume", "Mic volume (Sanbot ASR, 0-30)", v);
-            }
-
-            @Override
-            public void onStartRecognize() {
-                st.set(RobotState.G_SPEECH, "listening", "Recognizer", "listening");
-            }
-
-            @Override
-            public void onStopRecognize() {
-                st.set(RobotState.G_SPEECH, "listening", "Recognizer", "stopped");
-            }
-
-            @Override
-            public void onError(int a, int b) {
-                st.set(RobotState.G_SPEECH, "error", "Recognizer error", a + " / " + b);
             }
         });
         speech.setOnSpeechListener(new WakenListener() {
@@ -482,30 +322,30 @@ public class SanbotRobot {
                 st.set(RobotState.G_SPEECH, "awake", "Wake state", "sleeping");
                 st.event("wake", obj("awake", false));
             }
-
-            @Override
-            public void onWakeUpStatus(boolean b) {
-                st.set(RobotState.G_SPEECH, "awake", "Wake state", b ? "awake" : "sleeping");
-            }
         });
         speech.setOnSpeechListener(new SpeakListener() {
             @Override
-            public void onSpeakStatus(SpeakStatus s) {
-                if (s == null) return;
-                st.set(RobotState.G_SPEECH, "speaking", "TTS status",
-                        String.format(Locale.US, "%.0f%% \"%s\"", s.getProgress(), s.getText()));
-                st.event("speak_status", obj("id", s.getId(), "progress", s.getProgress(), "text", s.getText()));
+            public void onSpeakFinish() {
+                st.set(RobotState.G_SPEECH, "speaking", "TTS status", "finished");
+                st.event("speak_status", obj("progress", 100, "finished", true));
+            }
+
+            @Override
+            public void onSpeakProgress(int progress) {
+                st.set(RobotState.G_SPEECH, "speaking", "TTS status", progress + "%");
+                st.event("speak_status", obj("progress", progress));
             }
         });
 
+        if (hdCam == null) return;
         hdCam.setMediaListener(new MediaStreamListener() {
             @Override
-            public void getVideoStream(int handle, byte[] data, int width, int height) {
-                App.get().hdCamera().onVideoFrame(data, width, height);
+            public void getVideoStream(byte[] data) {
+                App.get().hdCamera().onVideoFrame(data, HD_W, HD_H);
             }
 
             @Override
-            public void getAudioStream(int handle, byte[] data) {
+            public void getAudioStream(byte[] data) {
                 App.get().hdCamera().onAudioPacket(data);
             }
         });
@@ -515,9 +355,8 @@ public class SanbotRobot {
                 JSONArray faces = new JSONArray();
                 StringBuilder names = new StringBuilder();
                 for (FaceRecognizeBean f : list) {
-                    faces.put(obj("user", f.getUser(), "gender", f.getGender(), "age", f.getAge(),
-                            "left", f.getLeft(), "top", f.getTop(), "right", f.getRight(), "bottom", f.getBottom(),
-                            "yaw", f.getYaw(), "pitch", f.getPitch(), "roll", f.getRoll()));
+                    faces.put(obj("user", f.getUser(), "gender", f.getGender(), "birthday", f.getBirthday(),
+                            "left", f.getLeft(), "top", f.getTop(), "right", f.getRight(), "bottom", f.getBottom()));
                     if (names.length() > 0) names.append(", ");
                     names.append(f.getUser() != null ? f.getUser() : "unknown");
                 }
@@ -560,6 +399,7 @@ public class SanbotRobot {
             case -1003: return "NOT_SYSTEM_APP";
             case -1004: return "FORBIDDEN_IN_ACTIVITY";
             case -1005: return "PARAM_INVALID";
+            case -1006: return "ASSETFILE_NOT_EXIST";
             case -1007: return "FORBIDDEN_IN_SERVICE";
             case -1008: return "NO_CHARGE_PILE";
             case -1009: return "CONNECTION_TIMEOUT";
@@ -646,20 +486,21 @@ public class SanbotRobot {
     }
 
     public synchronized JSONObject headCenter() {
-        OperationResult r = head.doResetMotion();
+        OperationResult r = head.doAbsoluteLocateMotion(
+                new LocateAbsoluteAngleHeadMotion(LocateAbsoluteAngleHeadMotion.ACTION_NO_LOCK, PAN_CENTER, TILT_CENTER));
         st.set(RobotState.G_HEAD, "pan_cmd", "Pan (horizontal) commanded", PAN_CENTER);
         st.set(RobotState.G_HEAD, "tilt_cmd", "Tilt (vertical) commanded", TILT_CENTER);
-        st.set(RobotState.G_HEAD, "last_cmd", "Last command", "reset / center");
+        st.set(RobotState.G_HEAD, "last_cmd", "Last command", "center");
         return res(r);
     }
 
     public synchronized JSONObject headStop() {
-        OperationResult r = head.doStopMotion();
+        OperationResult r = head.doRelativeAngleMotion(new RelativeAngleHeadMotion(RelativeAngleHeadMotion.ACTION_STOP, 0));
         st.set(RobotState.G_HEAD, "last_cmd", "Last command", "stop");
         return res(r);
     }
 
-    // ------------------------------------------------------------------ arms (wings on the Elf)
+    // ------------------------------------------------------------------ arms (HandMotionManager on SDK 1.1.8)
 
     private static String sideKey(String side) {
         switch (side) {
@@ -674,10 +515,10 @@ public class SanbotRobot {
 
     public synchronized JSONObject armAbsolute(String side, int angle, int speed) {
         String s = sideKey(side);
-        byte part = s.equals("left") ? AbsoluteAngleWingMotion.PART_LEFT
-                : s.equals("right") ? AbsoluteAngleWingMotion.PART_RIGHT : AbsoluteAngleWingMotion.PART_BOTH;
+        byte part = s.equals("left") ? AbsoluteAngleHandMotion.PART_LEFT
+                : s.equals("right") ? AbsoluteAngleHandMotion.PART_RIGHT : AbsoluteAngleHandMotion.PART_BOTH;
         int a = clamp(angle, ARM_MIN, ARM_MAX);
-        OperationResult r = wing.doAbsoluteAngleMotion(new AbsoluteAngleWingMotion(part, clamp(speed, SPEED_MIN, SPEED_MAX), a));
+        OperationResult r = hand.doAbsoluteAngleMotion(new AbsoluteAngleHandMotion(part, clamp(speed, SPEED_MIN, SPEED_MAX), a));
         if (!s.equals("right")) st.set(RobotState.G_ARMS, "left_cmd", "Left arm commanded angle", a);
         if (!s.equals("left")) st.set(RobotState.G_ARMS, "right_cmd", "Right arm commanded angle", a);
         st.set(RobotState.G_ARMS, "last_cmd", "Last command", "absolute " + s + " " + a + " deg");
@@ -686,11 +527,11 @@ public class SanbotRobot {
 
     public synchronized JSONObject armRelative(String side, String dir, int angle, int speed) {
         String s = sideKey(side);
-        byte part = s.equals("left") ? RelativeAngleWingMotion.PART_LEFT
-                : s.equals("right") ? RelativeAngleWingMotion.PART_RIGHT : RelativeAngleWingMotion.PART_BOTH;
-        byte action = "up".equals(dir) ? RelativeAngleWingMotion.ACTION_UP : RelativeAngleWingMotion.ACTION_DOWN;
-        OperationResult r = wing.doRelativeAngleMotion(
-                new RelativeAngleWingMotion(part, clamp(speed, SPEED_MIN, SPEED_MAX), action, clamp(angle, 0, ARM_MAX)));
+        byte part = s.equals("left") ? RelativeAngleHandMotion.PART_LEFT
+                : s.equals("right") ? RelativeAngleHandMotion.PART_RIGHT : RelativeAngleHandMotion.PART_BOTH;
+        byte action = "up".equals(dir) ? RelativeAngleHandMotion.ACTION_UP : RelativeAngleHandMotion.ACTION_DOWN;
+        OperationResult r = hand.doRelativeAngleMotion(
+                new RelativeAngleHandMotion(part, clamp(speed, SPEED_MIN, SPEED_MAX), action, clamp(angle, 0, ARM_MAX)));
         st.set(RobotState.G_ARMS, "last_cmd", "Last command", "relative " + s + " " + dir + " " + angle + " deg");
         return res(r);
     }
@@ -698,18 +539,18 @@ public class SanbotRobot {
     /** dir: up|down|stop|reset. up/down keep moving until stop or the limit. */
     public synchronized JSONObject armMove(String side, String dir, int speed) {
         String s = sideKey(side);
-        byte part = s.equals("left") ? NoAngleWingMotion.PART_LEFT
-                : s.equals("right") ? NoAngleWingMotion.PART_RIGHT : NoAngleWingMotion.PART_BOTH;
+        byte part = s.equals("left") ? NoAngleHandMotion.PART_LEFT
+                : s.equals("right") ? NoAngleHandMotion.PART_RIGHT : NoAngleHandMotion.PART_BOTH;
         byte action;
         switch (dir) {
-            case "up": action = NoAngleWingMotion.ACTION_UP; break;
-            case "down": action = NoAngleWingMotion.ACTION_DOWN; break;
-            case "stop": action = NoAngleWingMotion.ACTION_STOP; break;
-            case "reset": action = NoAngleWingMotion.ACTION_RESET; break;
+            case "up": action = NoAngleHandMotion.ACTION_UP; break;
+            case "down": action = NoAngleHandMotion.ACTION_DOWN; break;
+            case "stop": action = NoAngleHandMotion.ACTION_STOP; break;
+            case "reset": action = NoAngleHandMotion.ACTION_RESET; break;
             default: throw new IllegalArgumentException("dir must be up|down|stop|reset");
         }
-        OperationResult r = wing.doNoAngleMotion(new NoAngleWingMotion(part, clamp(speed, SPEED_MIN, SPEED_MAX), action));
-        if (action == NoAngleWingMotion.ACTION_RESET) {
+        OperationResult r = hand.doNoAngleMotion(new NoAngleHandMotion(part, clamp(speed, SPEED_MIN, SPEED_MAX), action));
+        if (action == NoAngleHandMotion.ACTION_RESET) {
             if (!s.equals("right")) st.set(RobotState.G_ARMS, "left_cmd", "Left arm commanded angle", ARM_DOWN);
             if (!s.equals("left")) st.set(RobotState.G_ARMS, "right_cmd", "Right arm commanded angle", ARM_DOWN);
         }
@@ -719,22 +560,23 @@ public class SanbotRobot {
 
     // ------------------------------------------------------------------ wheels
 
+    public static final String[] DRIVE_ACTIONS = {"forward", "back", "left", "right", "left_forward", "right_forward",
+            "left_back", "right_back", "turn_left", "turn_right", "stop"};
+
     private static byte wheelAction(String a) {
         switch (a) {
-            case "forward": return NoAngleWheelMotion.ACTION_FORWARD;
-            case "back": return NoAngleWheelMotion.ACTION_BACK;
-            case "left": return NoAngleWheelMotion.ACTION_LEFT;
-            case "right": return NoAngleWheelMotion.ACTION_RIGHT;
-            case "left_forward": return NoAngleWheelMotion.ACTION_LEFT_FORWARD;
-            case "right_forward": return NoAngleWheelMotion.ACTION_RIGHT_FORWARD;
-            case "left_back": return NoAngleWheelMotion.ACTION_LEFT_BACK;
-            case "right_back": return NoAngleWheelMotion.ACTION_RIGHT_BACK;
-            case "left_translation": return NoAngleWheelMotion.ACTION_LEFT_TRANSLATION;
-            case "right_translation": return NoAngleWheelMotion.ACTION_RIGHT_TRANSLATION;
+            case "forward": return NoAngleWheelMotion.ACTION_FORWARD_RUN;
+            case "back": return NoAngleWheelMotion.ACTION_BACK_RUN;
+            case "left": return NoAngleWheelMotion.ACTION_LEFT_CIRCLE;
+            case "right": return NoAngleWheelMotion.ACTION_RIGHT_CIRCLE;
+            case "left_forward": return NoAngleWheelMotion.ACTION_LEFT_FORWARD_RUN;
+            case "right_forward": return NoAngleWheelMotion.ACTION_RIGHT_FORWARD_RUN;
+            case "left_back": return NoAngleWheelMotion.ACTION_LEFT_BACK_RUN;
+            case "right_back": return NoAngleWheelMotion.ACTION_RIGHT_BACK_RUN;
             case "turn_left": return NoAngleWheelMotion.ACTION_TURN_LEFT;
             case "turn_right": return NoAngleWheelMotion.ACTION_TURN_RIGHT;
-            case "stop": return NoAngleWheelMotion.ACTION_STOP;
-            default: throw new IllegalArgumentException("unknown drive action: " + a);
+            case "stop": return NoAngleWheelMotion.ACTION_STOP_RUN;
+            default: throw new IllegalArgumentException("unknown drive action: " + a + " (SDK 1.1.8 has no sideways translation)");
         }
     }
 
@@ -744,12 +586,12 @@ public class SanbotRobot {
      */
     public synchronized JSONObject drive(String action, int speed, int timeoutMs) {
         byte a = wheelAction(action);
-        if (a == NoAngleWheelMotion.ACTION_STOP) return wheelsStop("drive stop");
+        if (a == NoAngleWheelMotion.ACTION_STOP_RUN) return wheelsStop("drive stop");
         int sp = clamp(speed, SPEED_MIN, SPEED_MAX);
         driveDeadline = SystemClock.uptimeMillis() + clamp(timeoutMs, 100, 5000);
         JSONObject out;
         if (!driving || a != driveAction || sp != driveSpeed) {
-            OperationResult r = wheel.doNoAngleMotion(new NoAngleWheelMotion(a, sp));
+            OperationResult r = wheel.doNoAngleMotion(new NoAngleWheelMotion(a, (byte) sp));
             out = res(r);
             driveAction = a;
             driveSpeed = sp;
@@ -778,8 +620,6 @@ public class SanbotRobot {
         switch (direction) {
             case "forward": a = DistanceWheelMotion.ACTION_FORWARD_RUN; break;
             case "back": a = DistanceWheelMotion.ACTION_BACK_RUN; break;
-            case "left_translation": a = DistanceWheelMotion.ACTION_LEFT_TRANSLATION; break;
-            case "right_translation": a = DistanceWheelMotion.ACTION_RIGHT_TRANSLATION; break;
             case "left_forward": a = DistanceWheelMotion.ACTION_LEFT_FORWARD_RUN; break;
             case "right_forward": a = DistanceWheelMotion.ACTION_RIGHT_FORWARD_RUN; break;
             case "left_back": a = DistanceWheelMotion.ACTION_LEFT_BACK_RUN; break;
@@ -793,20 +633,21 @@ public class SanbotRobot {
 
     public synchronized JSONObject wheelsStop(String reason) {
         driving = false;
-        driveAction = NoAngleWheelMotion.ACTION_STOP;
-        OperationResult a = wheel.doNoAngleMotion(new NoAngleWheelMotion(NoAngleWheelMotion.ACTION_STOP, 1));
+        driveAction = NoAngleWheelMotion.ACTION_STOP_RUN;
+        OperationResult a = wheel.doNoAngleMotion(new NoAngleWheelMotion(NoAngleWheelMotion.ACTION_STOP_RUN, (byte) 1));
+        OperationResult t = wheel.doNoAngleMotion(new NoAngleWheelMotion(NoAngleWheelMotion.ACTION_STOP_TURN, (byte) 1));
         OperationResult b = wheel.doDistanceMotion(new DistanceWheelMotion(DistanceWheelMotion.ACTION_STOP_RUN, 1, 0));
         OperationResult c = wheel.doRelativeAngleMotion(new RelativeAngleWheelMotion(RelativeAngleWheelMotion.TURN_STOP, 1, 0));
         st.set(RobotState.G_WHEELS, "action", "Current action", "stop");
         st.set(RobotState.G_WHEELS, "last_cmd", "Last command", "stop (" + reason + ")");
         EventLog.i(TAG, "wheels stop: " + reason);
-        return res(a, b, c);
+        return res(a, t, b, c);
     }
 
     public synchronized JSONObject stopAll(String reason) {
         JSONObject w = wheelsStop(reason);
-        safe("head stop", head::doStopMotion);
-        safe("arms stop", () -> wing.doNoAngleMotion(new NoAngleWingMotion(NoAngleWingMotion.PART_BOTH, 1, NoAngleWingMotion.ACTION_STOP)));
+        safe("head stop", this::headStop);
+        safe("arms stop", () -> hand.doNoAngleMotion(new NoAngleHandMotion(NoAngleHandMotion.PART_BOTH, 1, NoAngleHandMotion.ACTION_STOP)));
         st.set(RobotState.G_HEAD, "last_cmd", "Last command", "STOP ALL (" + reason + ")");
         st.set(RobotState.G_ARMS, "last_cmd", "Last command", "STOP ALL (" + reason + ")");
         return w;
@@ -818,23 +659,11 @@ public class SanbotRobot {
 
     // ------------------------------------------------------------------ speech
 
+    // SDK 1.1.8 TTS only knows Chinese and US English.
+    public static final String[] SPEAK_LANGS = {"en", "zh"};
+
     private static int lang(String l) {
-        if (l == null) return SpeakOption.LAG_ENGLISH_US;
-        switch (l) {
-            case "zh": return SpeakOption.LAG_CHINESE;
-            case "es": return SpeakOption.LAG_SPANISH_SPAIN;
-            case "fr": return SpeakOption.LAG_FRENCH_FRANCE;
-            case "pt": return SpeakOption.LAG_PORTUGUESE_PORTUGAL;
-            case "ar": return SpeakOption.LAG_ARABIC_INTERNATIONAL;
-            case "ja": return SpeakOption.LAG_JAPANESE;
-            case "it": return SpeakOption.LAG_ITALIAN;
-            case "pl": return SpeakOption.LAG_POLISH;
-            case "tr": return SpeakOption.LAG_TURKISH;
-            case "da": return SpeakOption.LAG_DANISH;
-            case "ko": return SpeakOption.LAG_KOREAN;
-            case "de": return SpeakOption.LAG_GERMAN;
-            default: return SpeakOption.LAG_ENGLISH_US;
-        }
+        return "zh".equals(l) ? SpeakOption.LAG_CHINESE : SpeakOption.LAG_ENGLISH_US;
     }
 
     public JSONObject speak(String text, String language, int speed, int intonation) {
@@ -918,33 +747,6 @@ public class SanbotRobot {
         return res(projector.switchProjector(on));
     }
 
-    private static byte lockPart(String p) {
-        switch (p) {
-            case "head": return MotorLock.PART_HEAD;
-            case "neck": return MotorLock.PART_NECK;
-            case "head_and_neck": return MotorLock.PART_HEAD_AND_NECK;
-            case "left_hand": return MotorLock.PART_LEFT_HAND;
-            case "right_hand": return MotorLock.PART_RIGHT_HAND;
-            case "both_hands": return MotorLock.PART_BOTH_HAND;
-            case "wheel": return MotorLock.PART_WHEEL;
-            default: throw new IllegalArgumentException("part: head|neck|head_and_neck|left_hand|right_hand|both_hands|wheel");
-        }
-    }
-
-    public static final String[] LOCK_PARTS = {"head_and_neck", "head", "neck", "both_hands", "left_hand", "right_hand", "wheel"};
-
-    public JSONObject motorLock(String part, boolean lock) {
-        OperationResult r = hw.lockMotor(new MotorLock(lockPart(part), lock ? MotorLock.LOCK : MotorLock.UNLOCK));
-        st.set(RobotState.G_LOCKS, "lock_" + part, "Lock " + part, lock ? "LOCKED" : "unlocked");
-        return res(r);
-    }
-
-    public JSONObject motorDefend(String part, boolean on) {
-        OperationResult r = hw.switchMotorDefend(new MotorDefend(lockPart(part), on ? MotorDefend.OPEN : MotorDefend.CLOSE));
-        st.set(RobotState.G_LOCKS, "defend_" + part, "Protection " + part, on ? "on" : "off");
-        return res(r);
-    }
-
     public JSONObject wander(boolean on) {
         st.set(RobotState.G_ACTUATORS, "wander", "Built-in wander mode", on ? "on" : "off");
         return res(modular.switchWander(on));
@@ -961,20 +763,20 @@ public class SanbotRobot {
         return res(modular.switchCharge(on));
     }
 
-    public JSONObject queryUltrasonic() { return res(hw.queryUltronicData()); }
-    public JSONObject queryPir() { return res(hw.queryPirStatus(1), hw.queryPirStatus(2)); }
-
     // ------------------------------------------------------------------ HD camera
 
     /** Returns the stream handle, or -1. Frames arrive through the MediaStreamListener as H.264. */
     public int openHdStream() {
+        if (hdCam == null) return -1;
         StreamOption o = new StreamOption();
         o.setChannel(StreamOption.MAIN_STREAM);
         o.setDecodType(StreamOption.HARDWARE_DECODE);
         o.setJustIframe(false);
         OperationResult r = hdCam.openStream(o);
         try {
-            return Integer.parseInt(r.getResult());
+            int h = Integer.parseInt(r.getResult());
+            if (h < 0) EventLog.w(TAG, "openStream returned handle " + h);
+            return h;
         } catch (Exception e) {
             EventLog.w(TAG, "openStream failed: " + codeName(r.getErrorCode()) + " " + r.getResult());
             return -1;
@@ -982,12 +784,12 @@ public class SanbotRobot {
     }
 
     public void closeHdStream(int handle) {
-        safe("closeStream", () -> hdCam.closeStream(handle));
+        if (hdCam != null) safe("closeStream", hdCam::closeStream);
     }
 
     public android.graphics.Bitmap hdSnapshot() {
         try {
-            return hdCam.getVideoImage();
+            return hdCam == null ? null : hdCam.getVideoImage();
         } catch (Throwable t) {
             return null;
         }
