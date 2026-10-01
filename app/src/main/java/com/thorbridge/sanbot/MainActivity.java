@@ -1,5 +1,7 @@
 package com.thorbridge.sanbot;
 
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +27,7 @@ import com.qihancloud.opensdk.function.unit.SpeechManager;
 import com.qihancloud.opensdk.function.unit.SystemManager;
 import com.qihancloud.opensdk.function.unit.WheelMotionManager;
 import com.thorbridge.sanbot.net.BridgeService;
+import com.thorbridge.sanbot.robot.MainServiceConnectionFix;
 import com.thorbridge.sanbot.robot.RobotState;
 import com.thorbridge.sanbot.robot.SanbotRobot;
 import com.thorbridge.sanbot.ui.ConnectionPage;
@@ -35,6 +38,8 @@ import com.thorbridge.sanbot.ui.Ui;
 
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,6 +51,7 @@ public class MainActivity extends TopBaseActivity {
 
     private final Handler ui = new Handler(Looper.getMainLooper());
     private final ExecutorService cmdExec = Executors.newSingleThreadExecutor();
+    private final Map<ServiceConnection, ServiceConnection> wrappedConnections = new HashMap<>();
     private SanbotRobot robot;
     private Page[] pages;
     private Button[] tabs;
@@ -92,6 +98,22 @@ public class MainActivity extends TopBaseActivity {
     @Override
     protected void onMainServiceConnected() {
         if (robot != null) robot.onMainServiceConnected();
+    }
+
+    @Override
+    public boolean bindService(Intent service, ServiceConnection conn, int flags) {
+        if (service != null && "com.sunbo.MainService".equals(service.getAction()) && conn != null) {
+            ServiceConnection fix = new MainServiceConnectionFix(this, conn, this::onMainServiceConnected);
+            wrappedConnections.put(conn, fix);
+            conn = fix;
+        }
+        return super.bindService(service, conn, flags);
+    }
+
+    @Override
+    public void unbindService(ServiceConnection conn) {
+        ServiceConnection fix = wrappedConnections.remove(conn);
+        super.unbindService(fix != null ? fix : conn);
     }
 
     @Override
