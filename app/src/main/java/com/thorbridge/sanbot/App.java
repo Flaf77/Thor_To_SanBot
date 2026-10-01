@@ -34,6 +34,8 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
+        if (CrashActivity.isCrashProcess()) return;
+        CrashActivity.install(this);
         prefs = new Prefs(this);
         state = new RobotState();
         dispatcher = new CommandDispatcher(this);
