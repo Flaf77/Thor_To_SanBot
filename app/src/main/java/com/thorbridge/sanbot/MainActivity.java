@@ -1,5 +1,6 @@
 package com.thorbridge.sanbot;
 
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Typeface;
@@ -27,6 +28,7 @@ import com.qihancloud.opensdk.function.unit.SpeechManager;
 import com.qihancloud.opensdk.function.unit.SystemManager;
 import com.qihancloud.opensdk.function.unit.WheelMotionManager;
 import com.thorbridge.sanbot.net.BridgeService;
+import com.thorbridge.sanbot.robot.AppGuard;
 import com.thorbridge.sanbot.robot.MainServiceConnectionFix;
 import com.thorbridge.sanbot.robot.RobotState;
 import com.thorbridge.sanbot.robot.SanbotRobot;
@@ -39,7 +41,9 @@ import com.thorbridge.sanbot.ui.Ui;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,7 +55,10 @@ public class MainActivity extends TopBaseActivity {
 
     private final Handler ui = new Handler(Looper.getMainLooper());
     private final ExecutorService cmdExec = Executors.newSingleThreadExecutor();
+    private final ExecutorService guardExec = Executors.newSingleThreadExecutor();
     private final Map<ServiceConnection, ServiceConnection> wrappedConnections = new HashMap<>();
+    private final Set<ServiceConnection> blockedConnections = new HashSet<>();
+    private AppGuard guard;
     private SanbotRobot robot;
     private Page[] pages;
     private Button[] tabs;
@@ -93,9 +100,39 @@ public class MainActivity extends TopBaseActivity {
         }
 
         BridgeService.start(this);
+        guard = new AppGuard(this, app.state());
         setContentView(buildUi());
         showPage(0);
         ui.post(ticker);
+        ui.post(guardTick);
+    }
+
+    private final Runnable guardTick = new Runnable() {
+        @Override
+        public void run() {
+            if (App.get().prefs().blockOtherApps()) runGuard();
+            ui.postDelayed(this, 30000);
+        }
+    };
+
+    /** Stops other robot apps now (background thread). */
+    public void runGuard() {
+        guardExec.submit(guard::sweep);
+    }
+
+    /** Screen pinning: other apps cannot come to the front until unpinned (Android asks the user once). */
+    public void setPinned(boolean on) {
+        try {
+            if (on) startLockTask();
+            else stopLockTask();
+        } catch (Exception e) {
+            Toast.makeText(this, "Screen pinning failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    public boolean isPinned() {
+        return ((ActivityManager) getSystemService(ACTIVITY_SERVICE)).isInLockTaskMode();
     }
 
     @Override
@@ -105,7 +142,21 @@ public class MainActivity extends TopBaseActivity {
 
     @Override
     public boolean bindService(Intent service, ServiceConnection conn, int flags) {
-        if (service != null && "com.sunbo.MainService".equals(service.getAction()) && conn != null) {
+        String action = service != null ? service.getAction() : null;
+        if ("com.hfisone.FaceDetectService".equals(action)) {
+            RobotState st = App.get().state();
+            String label = "Sanbot face/camera service (com.hfisone)";
+            if (!App.get().prefs().allowFaceService()) {
+                st.set(RobotState.G_ROBOT, "face_service", label, "blocked by this app (camera sensor left free)");
+                blockedConnections.add(conn);
+                return false;
+            }
+            boolean ok = super.bindService(service, conn, flags);
+            st.set(RobotState.G_ROBOT, "face_service", label, ok ? "bound (it may hold the camera sensor)" : "not installed / bind refused");
+            if (!ok) blockedConnections.add(conn);
+            return ok;
+        }
+        if ("com.sunbo.MainService".equals(action) && conn != null) {
             ServiceConnection fix = new MainServiceConnectionFix(this, conn, this::onMainServiceConnected);
             wrappedConnections.put(conn, fix);
             conn = fix;
@@ -115,6 +166,7 @@ public class MainActivity extends TopBaseActivity {
 
     @Override
     public void unbindService(ServiceConnection conn) {
+        if (blockedConnections.remove(conn)) return;
         ServiceConnection fix = wrappedConnections.remove(conn);
         super.unbindService(fix != null ? fix : conn);
     }
@@ -126,6 +178,7 @@ public class MainActivity extends TopBaseActivity {
         App.get().setRobot(null);
         if (robot != null) robot.stop();
         cmdExec.shutdown();
+        guardExec.shutdown();
         super.onDestroy();
     }
 

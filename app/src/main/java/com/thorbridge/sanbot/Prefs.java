@@ -29,6 +29,8 @@ public class Prefs {
     public int driveTimeoutMs() { return sp.getInt("drive_timeout_ms", 600); }
     public boolean autoStartOnBoot() { return sp.getBoolean("autostart", true); }
     public String robotName() { return sp.getString("robot_name", "sanbot"); }
+    public boolean blockOtherApps() { return sp.getBoolean("block_other_apps", true); }
+    public boolean allowFaceService() { return sp.getBoolean("allow_face_service", true); }
 
     public void setServer(boolean enabled, int port) {
         sp.edit().putBoolean("server_enabled", enabled).putInt("server_port", port).apply();
@@ -44,4 +46,6 @@ public class Prefs {
     public void setDriveTimeoutMs(int ms) { sp.edit().putInt("drive_timeout_ms", ms).apply(); }
     public void setAutoStartOnBoot(boolean b) { sp.edit().putBoolean("autostart", b).apply(); }
     public void setRobotName(String n) { sp.edit().putString("robot_name", n).apply(); }
+    public void setBlockOtherApps(boolean b) { sp.edit().putBoolean("block_other_apps", b).apply(); }
+    public void setAllowFaceService(boolean b) { sp.edit().putBoolean("allow_face_service", b).apply(); }
 }

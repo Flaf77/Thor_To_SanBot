@@ -26,7 +26,7 @@ import java.util.List;
 /** Connect the tablet to Thor over Ethernet / USB tethering / Wi-Fi LAN. */
 public class ConnectionPage extends Page {
 
-    private TextView ifaces, sessions, clientStatus, serverStatus, logView;
+    private TextView ifaces, sessions, clientStatus, serverStatus, logView, pinState;
     private LinearLayout peersBox;
     private EditText host, port, serverPort, token, rate, driveTimeout, robotName;
     private CheckBox clientOn, serverOn, autostart;
@@ -64,6 +64,36 @@ public class ConnectionPage extends Page {
 
         robotInfo = new GroupView(c, RobotState.G_ROBOT, "Robot / SDK");
         left.addView(robotInfo.card);
+
+        // --- exclusive control
+        LinearLayout ex = Ui.card(c, "Exclusive control (block other robot apps)");
+        CheckBox block = Ui.check(c, "Stop other robot apps every 30 s while this app runs", p.blockOtherApps());
+        block.setOnCheckedChangeListener((b, on) -> {
+            p.setBlockOtherApps(on);
+            if (on) act.runGuard();
+        });
+        ex.addView(block);
+        CheckBox face = Ui.check(c, "Allow the Sanbot face/camera service (com.hfisone). Uncheck if the tablet camera "
+                + "shows no image: it may hold the camera sensor. Needs an app restart.", p.allowFaceService());
+        face.setOnCheckedChangeListener((b, on) -> {
+            p.setAllowFaceService(on);
+            Toast.makeText(act, "Close and reopen the app to apply", Toast.LENGTH_LONG).show();
+        });
+        ex.addView(face);
+        LinearLayout exBtns = Ui.hbox(c);
+        exBtns.addView(Ui.button(c, "Stop them now", v -> act.runGuard()));
+        exBtns.addView(Ui.button(c, "Pin this app", v -> act.setPinned(true)));
+        exBtns.addView(Ui.button(c, "Unpin", v -> act.setPinned(false)));
+        ex.addView(exBtns);
+        pinState = Ui.text(c, "", 13, Ui.TEXT);
+        ex.addView(pinState);
+        ex.addView(Ui.text(c, "Stops every robot app (sunbo/qihan/sanbot/hfisone/uvc) and user apps with running services, "
+                + "except com.sunbo.main (MainService, required for all robot control), apps serving on 127.0.0.1 "
+                + "(local services such as the camera stream), TTS engines and the keyboard. "
+                + "Android lets a normal app stop only background processes: system-protected apps stay running and are "
+                + "listed under 'Robot / SDK'. The face/camera service has its own switch above. "
+                + "Pinning keeps other apps from coming to the front; use 'Unpin' here to leave.", 12, Ui.DIM));
+        left.addView(ex);
 
         // --- tablet -> Thor
         LinearLayout cl = Ui.card(c, "Connect to Thor (tablet is the client)");
@@ -191,6 +221,9 @@ public class ConnectionPage extends Page {
         clientStatus.setText("Status: " + app.bridge().clientStatus());
         serverStatus.setText("Status: " + app.bridge().serverStatus());
         robotInfo.refresh();
+        boolean pinned = act.isPinned();
+        pinState.setText(pinned ? "App is PINNED: other apps cannot open" : "Not pinned");
+        pinState.setTextColor(pinned ? Ui.OK : Ui.DIM);
 
         StringBuilder s = new StringBuilder();
         for (ControlSession cs : app.bridge().sessions()) {

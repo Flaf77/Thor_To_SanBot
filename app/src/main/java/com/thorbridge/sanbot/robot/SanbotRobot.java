@@ -209,9 +209,13 @@ public class SanbotRobot {
             EventLog.e(TAG, "cannot list system apps", e);
         }
         st.set(RobotState.G_ROBOT, "system_apps", "Sanbot system apps", sb.length() == 0 ? "none found" : sb.toString());
+        updateLocalSockets();
+    }
+
+    private void updateLocalSockets() {
         StringBuilder ports = new StringBuilder();
         for (String p : NetUtils.listeningPorts(App.get())) ports.append(ports.length() > 0 ? "\n" : "").append(p);
-        st.set(RobotState.G_ROBOT, "local_ports", "Listening TCP ports (tablet)", ports.length() == 0 ? "none found" : ports.toString());
+        st.set(RobotState.G_ROBOT, "local_ports", "Local TCP sockets (who serves / uses what)", ports.length() == 0 ? "none found" : ports.toString());
     }
 
     private void readStaticInfo() {
@@ -240,6 +244,7 @@ public class SanbotRobot {
                 });
             }
             if (!serviceConnected && pollTick % 6 == 1) reportWaiting();
+            if (pollTick % 20 == 0) safe("local sockets", SanbotRobot.this::updateLocalSockets);
             handler.postDelayed(this, 500);
         }
     };
@@ -793,6 +798,19 @@ public class SanbotRobot {
 
     /** Returns the stream handle, or -1. Frames arrive through the MediaStreamListener as H.264. */
     public int openHdStream() {
+        int h = tryOpenHdStream();
+        if (h < 0 && hdCam != null) {
+            // On some units the head camera is also visible to Android; our own tablet preview would then block it.
+            int cam = App.get().cameras().closeNow();
+            if (cam >= 0) {
+                EventLog.w(TAG, "closed Android camera " + cam + " (may hold the head camera) and retrying the HD stream");
+                h = tryOpenHdStream();
+            }
+        }
+        return h;
+    }
+
+    private int tryOpenHdStream() {
         if (hdCam == null) {
             if (hdError == null) hdError = "HD camera manager not available";
             return -1;
@@ -820,7 +838,7 @@ public class SanbotRobot {
             }
             resetHdStream();
         }
-        hdError = err + "the robot's local camera stream service did not accept the connection. Listening local ports: "
+        hdError = err + "the robot's local camera stream service did not accept the connection. Local sockets: "
                 + NetUtils.listeningPorts(App.get());
         EventLog.w(TAG, "HD camera openStream failed: " + hdError);
         return -1;

@@ -38,7 +38,10 @@ public final class NetUtils {
 
     private NetUtils() {}
 
-    /** TCP ports in LISTEN state on this tablet with the owning app, e.g. "127.0.0.1:12000 com.sunbo.main". */
+    /**
+     * TCP sockets on this tablet with the owning app: servers ("LISTEN 127.0.0.1:12000 com.sunbo.main") and
+     * local connections between apps ("CONN com.x -> 127.0.0.1:5000"), to see who uses which local service.
+     */
     public static List<String> listeningPorts(Context ctx) {
         List<String> out = new ArrayList<>();
         PackageManager pm = ctx.getPackageManager();
@@ -48,18 +51,30 @@ public final class NetUtils {
                 String line;
                 while ((line = r.readLine()) != null) {
                     String[] f = line.trim().split("\\s+");
-                    if (f.length < 8 || !"0A".equals(f[3])) continue;
-                    String[] local = f[1].split(":");
-                    int port = Integer.parseInt(local[1], 16);
-                    String ip = local[0].matches("0+") ? "*" : local[0].endsWith("0100007F") ? "127.0.0.1" : local[0];
+                    if (f.length < 8) continue;
+                    String[] local = f[1].split(":"), remote = f[2].split(":");
                     String owner = pm.getNameForUid(Integer.parseInt(f[7]));
-                    String entry = ip + ":" + port + " " + (owner != null ? owner : "uid " + f[7]);
+                    if (owner == null) owner = "uid " + f[7];
+                    String entry;
+                    if ("0A".equals(f[3])) {
+                        entry = "LISTEN " + ip(local[0]) + ":" + Integer.parseInt(local[1], 16) + " " + owner;
+                    } else if ("01".equals(f[3]) && "127.0.0.1".equals(ip(remote[0]))) {
+                        entry = "CONN " + owner + " -> 127.0.0.1:" + Integer.parseInt(remote[1], 16);
+                    } else {
+                        continue;
+                    }
                     if (!out.contains(entry)) out.add(entry);
                 }
             } catch (Exception ignored) {
             }
         }
         return out;
+    }
+
+    private static String ip(String hex) {
+        if (hex.matches("0+")) return "*";
+        if (hex.endsWith("0100007F")) return "127.0.0.1";
+        return hex;
     }
 
     /** IPv4 addresses of all interfaces that are up (loopback excluded). */
