@@ -43,6 +43,7 @@ import com.qihancloud.opensdk.function.unit.interfaces.speech.SpeakListener;
 import com.qihancloud.opensdk.function.unit.interfaces.speech.WakenListener;
 import com.thorbridge.sanbot.App;
 import com.thorbridge.sanbot.EventLog;
+import com.thorbridge.sanbot.net.NetUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -208,6 +209,9 @@ public class SanbotRobot {
             EventLog.e(TAG, "cannot list system apps", e);
         }
         st.set(RobotState.G_ROBOT, "system_apps", "Sanbot system apps", sb.length() == 0 ? "none found" : sb.toString());
+        StringBuilder ports = new StringBuilder();
+        for (String p : NetUtils.listeningPorts(App.get())) ports.append(ports.length() > 0 ? "\n" : "").append(p);
+        st.set(RobotState.G_ROBOT, "local_ports", "Listening TCP ports (tablet)", ports.length() == 0 ? "none found" : ports.toString());
     }
 
     private void readStaticInfo() {
@@ -816,7 +820,8 @@ public class SanbotRobot {
             }
             resetHdStream();
         }
-        hdError = err + "the robot's local camera stream service did not accept the connection";
+        hdError = err + "the robot's local camera stream service did not accept the connection. Listening local ports: "
+                + NetUtils.listeningPorts(App.get());
         EventLog.w(TAG, "HD camera openStream failed: " + hdError);
         return -1;
     }

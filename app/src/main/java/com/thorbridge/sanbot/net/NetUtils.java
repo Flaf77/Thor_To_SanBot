@@ -1,5 +1,10 @@
 package com.thorbridge.sanbot.net;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -32,6 +37,30 @@ public final class NetUtils {
     }
 
     private NetUtils() {}
+
+    /** TCP ports in LISTEN state on this tablet with the owning app, e.g. "127.0.0.1:12000 com.sunbo.main". */
+    public static List<String> listeningPorts(Context ctx) {
+        List<String> out = new ArrayList<>();
+        PackageManager pm = ctx.getPackageManager();
+        for (String file : new String[]{"/proc/net/tcp", "/proc/net/tcp6"}) {
+            try (BufferedReader r = new BufferedReader(new FileReader(file))) {
+                r.readLine();
+                String line;
+                while ((line = r.readLine()) != null) {
+                    String[] f = line.trim().split("\\s+");
+                    if (f.length < 8 || !"0A".equals(f[3])) continue;
+                    String[] local = f[1].split(":");
+                    int port = Integer.parseInt(local[1], 16);
+                    String ip = local[0].matches("0+") ? "*" : local[0].endsWith("0100007F") ? "127.0.0.1" : local[0];
+                    String owner = pm.getNameForUid(Integer.parseInt(f[7]));
+                    String entry = ip + ":" + port + " " + (owner != null ? owner : "uid " + f[7]);
+                    if (!out.contains(entry)) out.add(entry);
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return out;
+    }
 
     /** IPv4 addresses of all interfaces that are up (loopback excluded). */
     public static List<Iface> interfaces() {

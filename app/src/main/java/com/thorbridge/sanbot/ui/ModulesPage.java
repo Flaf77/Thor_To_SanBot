@@ -213,8 +213,10 @@ public class ModulesPage extends Page {
         final Spinner lang = Ui.spinner(c, langs);
         LinearLayout row = Ui.hbox(c);
         row.addView(lang);
-        row.addView(Ui.button(c, "Speak (Sanbot TTS)", v -> act.runCmd("speak", "text", text.getText().toString(),
-                "lang", langs[lang.getSelectedItemPosition()])));
+        row.addView(Ui.button(c, "Speak (Android TTS)", v -> act.runCmd("speak", "engine", "android",
+                "text", text.getText().toString(), "lang", langs[lang.getSelectedItemPosition()])));
+        row.addView(Ui.button(c, "Speak (Sanbot TTS)", v -> act.runCmd("speak", "engine", "sanbot",
+                "text", text.getText().toString(), "lang", langs[lang.getSelectedItemPosition()])));
         row.addView(Ui.button(c, "Stop", v -> act.runCmd("speak.stop")));
         row.addView(Ui.button(c, "Test tone", v -> app.speaker().testTone()));
         card.addView(row);

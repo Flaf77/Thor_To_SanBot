@@ -37,7 +37,7 @@ public class CommandDispatcher {
             "arm.absolute {side,angle,speed?}", "arm.relative {side,direction,angle,speed?}", "arm.move {side,direction,speed?}",
             "wheels.drive {action,speed?,timeout_ms?}", "wheels.turn {direction,angle,speed?}",
             "wheels.distance {direction,cm,speed?}", "wheels.stop", "stop_all",
-            "speak {text,lang?(auto|en|zh),speed?,intonation?}", "speak.stop", "speech.wakeup", "speech.sleep",
+            "speak {text,engine?(android|sanbot),lang?(auto|en|zh),speed?,intonation?}", "speak.stop", "speech.wakeup", "speech.sleep",
             "led {part,mode,delay?,random?}", "white_light {on,level?}", "emotion {name}", "projector {on}",
             "wander {on}", "follow {on}", "charge {on}",
             "volume {percent}", "screen.text {text}",
@@ -171,9 +171,16 @@ public class CommandDispatcher {
                 return robot().stopAll("command");
 
             case "speak":
-                return robot().speak(req(a, "text"), a.optString("lang", "auto"), a.optInt("speed", 50), a.optInt("intonation", 50));
-            case "speak.stop":
-                return robot().stopSpeak();
+                // The Sanbot speech service on MainService 1.5.x accepts speak but stays silent, so Android TTS is the default.
+                if ("sanbot".equals(a.optString("engine", "android"))) {
+                    return robot().speak(req(a, "text"), a.optString("lang", "auto"), a.optInt("speed", 50), a.optInt("intonation", 50));
+                }
+                return app.tts().speak(req(a, "text"), a.optString("lang", "auto"), a.optInt("speed", 50), a.optInt("intonation", 50));
+            case "speak.stop": {
+                app.tts().stop();
+                SanbotRobot r = app.robot();
+                return r != null && r.isServiceConnected() ? r.stopSpeak() : obj("ok", true);
+            }
             case "speech.wakeup":
                 return robot().wakeUp();
             case "speech.sleep":

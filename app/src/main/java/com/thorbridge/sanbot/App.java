@@ -3,6 +3,7 @@ package com.thorbridge.sanbot;
 import android.app.Application;
 
 import com.thorbridge.sanbot.media.AndroidCameraHub;
+import com.thorbridge.sanbot.media.AndroidTts;
 import com.thorbridge.sanbot.media.HdCameraHub;
 import com.thorbridge.sanbot.media.MicStreamer;
 import com.thorbridge.sanbot.media.SpeakerSink;
@@ -23,6 +24,7 @@ public class App extends Application {
     private AndroidCameraHub cameras;
     private MicStreamer mic;
     private SpeakerSink speaker;
+    private AndroidTts tts;
     private Bridge bridge;
     private volatile SanbotRobot robot;
 
@@ -43,6 +45,7 @@ public class App extends Application {
         cameras = new AndroidCameraHub();
         mic = new MicStreamer(state);
         speaker = new SpeakerSink();
+        tts = new AndroidTts(this, state);
         bridge = new Bridge(this);
         EventLog.i("app", "Sanbot Thor Bridge started");
     }
@@ -54,6 +57,7 @@ public class App extends Application {
     public AndroidCameraHub cameras() { return cameras; }
     public MicStreamer mic() { return mic; }
     public SpeakerSink speaker() { return speaker; }
+    public AndroidTts tts() { return tts; }
     public Bridge bridge() { return bridge; }
 
     /** Null while the Sanbot SDK is not attached (MainActivity not alive). */
