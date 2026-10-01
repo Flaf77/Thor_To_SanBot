@@ -29,7 +29,6 @@ public class MotorsPage extends Page {
     private final List<GroupView> groups = new ArrayList<>();
     private final Handler ui = new Handler(Looper.getMainLooper());
     private LinearLayout wheelSpeed;
-    private TextView lastResult;
     private Runnable driveRepeat;
 
     public MotorsPage(MainActivity act) {
@@ -46,9 +45,6 @@ public class MotorsPage extends Page {
                 app.prefs().allowRemoteControl());
         allow.setOnCheckedChangeListener((b, v) -> app.prefs().setAllowRemoteControl(v));
         root.addView(allow);
-        lastResult = Ui.mono(c, "Last tablet command result: -", 12);
-        lastResult.setTextColor(Ui.DIM);
-        root.addView(lastResult);
 
         LinearLayout cols = Ui.hbox(c);
         cols.setGravity(android.view.Gravity.TOP);
@@ -62,10 +58,6 @@ public class MotorsPage extends Page {
         right.addView(wheelsCard(c));
         left.addView(actuatorsCard(c));
         return sv;
-    }
-
-    public void showResult(String cmd, String json) {
-        if (lastResult != null) lastResult.setText("Last tablet command: " + cmd + " -> " + json);
     }
 
     private LinearLayout withState(Context c, String group, String title) {
@@ -177,11 +169,13 @@ public class MotorsPage extends Page {
         b.setOnTouchListener((v, e) -> {
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
+                    // Otherwise the ScrollView steals the touch on the slightest finger move and sends CANCEL (= stop).
+                    v.getParent().requestDisallowInterceptTouchEvent(true);
                     stopRepeat();
                     driveRepeat = new Runnable() {
                         @Override
                         public void run() {
-                            act.runCmd("wheels.drive", "action", action, "speed", speed(), "timeout_ms", 700);
+                            act.runCmd("wheels.drive", "action", action, "speed", speed(), "timeout_ms", 1000);
                             ui.postDelayed(this, 250);
                         }
                     };
@@ -189,6 +183,7 @@ public class MotorsPage extends Page {
                     return true;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
+                    v.getParent().requestDisallowInterceptTouchEvent(false);
                     stopRepeat();
                     act.runCmd("wheels.stop");
                     return true;

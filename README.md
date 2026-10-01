@@ -161,7 +161,7 @@ The control channel is TCP on port 9100. Messages are **newline-delimited JSON**
 | Head | `head.absolute {pan?,tilt?}`, `head.locate {pan,tilt,lock?}`, `head.relative {direction,angle}`, `head.center`, `head.stop` |
 | Arms | `arm.absolute {side,angle,speed?}`, `arm.relative {side,direction,angle,speed?}`, `arm.move {side,direction(up/down/stop/reset),speed?}` |
 | Wheels | `wheels.drive {action,speed?,timeout_ms?}`, `wheels.turn {direction,angle,speed?}`, `wheels.distance {direction,cm,speed?}`, `wheels.stop`, `stop_all` |
-| Voice | `speak {text,lang?(en/zh),speed?,intonation?}`, `speak.stop`, `speech.wakeup`, `speech.sleep`, `volume {percent}` |
+| Voice | `speak {text,lang?(auto/en/zh),speed?,intonation?}`, `speak.stop`, `speech.wakeup`, `speech.sleep`, `volume {percent}` |
 | Other | `led {part,mode}`, `white_light {on,level?}`, `emotion {name}`, `projector {on}`, `wander {on}`, `follow {on}`, `charge {on}` (drive to the dock), `screen.text {text}` |
 
 **Events:** `touch`, `pir`, `voice_locate` (sound angle), `speech` (recognized sentence), `wake`, `speak_status`, `faces`, `alarm`, `estop`.

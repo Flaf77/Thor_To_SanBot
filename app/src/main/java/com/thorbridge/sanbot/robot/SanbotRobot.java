@@ -47,6 +47,8 @@ import com.thorbridge.sanbot.EventLog;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Locale;
 
@@ -90,6 +92,7 @@ public class SanbotRobot {
 
     // SDK 1.1.8 does not report the HD stream size; this is the Elf head camera main stream.
     private static final int HD_W = 1280, HD_H = 720;
+    private volatile String hdError;
 
     private final HandlerThread thread = new HandlerThread("robot-poll");
     private Handler handler;
@@ -588,10 +591,13 @@ public class SanbotRobot {
         byte a = wheelAction(action);
         if (a == NoAngleWheelMotion.ACTION_STOP_RUN) return wheelsStop("drive stop");
         int sp = clamp(speed, SPEED_MIN, SPEED_MAX);
-        driveDeadline = SystemClock.uptimeMillis() + clamp(timeoutMs, 100, 5000);
+        int timeout = clamp(timeoutMs, 100, 5000);
+        driveDeadline = SystemClock.uptimeMillis() + timeout;
         JSONObject out;
         if (!driving || a != driveAction || sp != driveSpeed) {
             OperationResult r = wheel.doNoAngleMotion(new NoAngleWheelMotion(a, (byte) sp));
+            // The MainService call can be slow; don't let the watchdog count that time against the client.
+            driveDeadline = SystemClock.uptimeMillis() + timeout;
             out = res(r);
             driveAction = a;
             driveSpeed = sp;
@@ -659,19 +665,26 @@ public class SanbotRobot {
 
     // ------------------------------------------------------------------ speech
 
-    // SDK 1.1.8 TTS only knows Chinese and US English.
-    public static final String[] SPEAK_LANGS = {"en", "zh"};
+    // "auto" = plain text with the robot's own voice settings; en/zh send a SpeakOption (SDK 1.1.8 knows only these).
+    public static final String[] SPEAK_LANGS = {"auto", "en", "zh"};
 
     private static int lang(String l) {
         return "zh".equals(l) ? SpeakOption.LAG_CHINESE : SpeakOption.LAG_ENGLISH_US;
     }
 
     public JSONObject speak(String text, String language, int speed, int intonation) {
-        SpeakOption o = new SpeakOption();
-        o.setLanguageType(lang(language));
-        o.setSpeed(clamp(speed, 0, 100));
-        o.setIntonation(clamp(intonation, 0, 100));
-        return res(speech.startSpeak(text, o));
+        OperationResult r;
+        if (language == null || language.isEmpty() || "auto".equals(language)) {
+            r = speech.startSpeak(text);
+        } else {
+            SpeakOption o = new SpeakOption();
+            o.setLanguageType(lang(language));
+            o.setSpeed(clamp(speed, 0, 100));
+            o.setIntonation(clamp(intonation, 0, 100));
+            r = speech.startSpeak(text, o);
+        }
+        st.set(RobotState.G_SPEECH, "speaking", "TTS status", "requested (" + language + "): " + codeName(r == null ? 0 : r.getErrorCode()));
+        return res(r);
     }
 
     public JSONObject stopSpeak() { return res(speech.stopSpeak()); }
@@ -765,21 +778,60 @@ public class SanbotRobot {
 
     // ------------------------------------------------------------------ HD camera
 
+    public void setHdUnavailable(String reason) {
+        hdError = reason;
+    }
+
+    /** Why the last openHdStream() failed. */
+    public String hdError() {
+        return hdError;
+    }
+
     /** Returns the stream handle, or -1. Frames arrive through the MediaStreamListener as H.264. */
     public int openHdStream() {
-        if (hdCam == null) return -1;
-        StreamOption o = new StreamOption();
-        o.setChannel(StreamOption.MAIN_STREAM);
-        o.setDecodType(StreamOption.HARDWARE_DECODE);
-        o.setJustIframe(false);
-        OperationResult r = hdCam.openStream(o);
-        try {
-            int h = Integer.parseInt(r.getResult());
-            if (h < 0) EventLog.w(TAG, "openStream returned handle " + h);
-            return h;
-        } catch (Exception e) {
-            EventLog.w(TAG, "openStream failed: " + codeName(r.getErrorCode()) + " " + r.getResult());
+        if (hdCam == null) {
+            if (hdError == null) hdError = "HD camera manager not available";
             return -1;
+        }
+        StringBuilder err = new StringBuilder();
+        int[] channels = {StreamOption.MAIN_STREAM, StreamOption.SUB_STREAM};
+        String[] names = {"main", "sub"};
+        for (int i = 0; i < channels.length; i++) {
+            try {
+                StreamOption o = new StreamOption();
+                o.setChannel(channels[i]);
+                o.setDecodType(StreamOption.HARDWARE_DECODE);
+                o.setJustIframe(false);
+                OperationResult r = hdCam.openStream(o);
+                String result = r.getResult();
+                int h = result == null ? -1 : Integer.parseInt(result.trim());
+                if (h >= 0) {
+                    EventLog.i(TAG, "HD camera " + names[i] + " stream open, handle " + h);
+                    hdError = null;
+                    return h;
+                }
+                err.append(names[i]).append(" stream: native open returned ").append(result).append("; ");
+            } catch (Throwable t) {
+                err.append(names[i]).append(" stream: ").append(t).append("; ");
+            }
+            resetHdStream();
+        }
+        hdError = err + "the robot's local camera stream service did not accept the connection";
+        EventLog.w(TAG, "HD camera openStream failed: " + hdError);
+        return -1;
+    }
+
+    /** The SDK keeps a failed handle / half-done native init and then never retries; undo that. */
+    private void resetHdStream() {
+        try {
+            Field f = MediaManager.class.getDeclaredField("handle");
+            f.setAccessible(true);
+            f.setInt(hdCam, -1);
+            Method done = MediaManager.class.getDeclaredMethod("done");
+            done.setAccessible(true);
+            done.invoke(hdCam);
+        } catch (Throwable t) {
+            EventLog.e(TAG, "HD camera reset failed", t);
         }
     }
 

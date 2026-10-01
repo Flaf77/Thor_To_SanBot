@@ -56,7 +56,7 @@ public class MainActivity extends TopBaseActivity {
     private Page[] pages;
     private Button[] tabs;
     private int current = -1;
-    private TextView status, battery, banner;
+    private TextView status, battery, banner, lastCmd;
     private Button estop;
 
     @Override
@@ -66,9 +66,11 @@ public class MainActivity extends TopBaseActivity {
 
         App app = App.get();
         MediaManager media = null;
+        String mediaError = null;
         try {
             media = (MediaManager) getUnitManager(FuncConstant.MEDIA_MANAGER);
         } catch (Throwable t) {
+            mediaError = "HD camera library (libuvcNative) failed to load: " + t;
             EventLog.e("main", "HD camera manager unavailable (libuvcNative)", t);
         }
         try {
@@ -82,6 +84,7 @@ public class MainActivity extends TopBaseActivity {
                     media,
                     (ProjectorManager) getUnitManager(FuncConstant.PROJECTOR_MANAGER),
                     (ModularMotionManager) getUnitManager(FuncConstant.MODULARMOTION_MANAGER));
+            if (mediaError != null) robot.setHdUnavailable(mediaError);
             robot.start();
             app.setRobot(robot);
         } catch (Throwable t) {
@@ -164,6 +167,12 @@ public class MainActivity extends TopBaseActivity {
         }
         root.addView(tabBar);
 
+        lastCmd = Ui.mono(this, "Last tablet command: -", 12);
+        lastCmd.setTextColor(Ui.DIM);
+        lastCmd.setSingleLine(true);
+        lastCmd.setPadding(p, 0, p, 0);
+        root.addView(lastCmd);
+
         FrameLayout content = new FrameLayout(this);
         for (Page pg : pages) {
             View v = pg.view();
@@ -223,7 +232,7 @@ public class MainActivity extends TopBaseActivity {
             final JSONObject ack = App.get().dispatcher().tablet(cmd, kv);
             final boolean ok = ack.optBoolean("ok");
             if (!"wheels.drive".equals(cmd) || !ok) {
-                ui.post(() -> ((MotorsPage) pages[1]).showResult(cmd, ack.toString()));
+                ui.post(() -> lastCmd.setText("Last tablet command: " + cmd + " -> " + ack));
             }
             if (!ok && !"wheels.drive".equals(cmd)) {
                 final String why = ack.has("error") ? ack.optString("error") : String.valueOf(ack.optJSONObject("result"));

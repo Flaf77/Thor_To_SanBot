@@ -59,7 +59,7 @@ public class HdCameraHub {
         handle = robot.openHdStream();
         EventLog.i("hdcam", "HD camera openStream -> handle " + handle);
         App.get().state().set(RobotState.G_CAMERA, "hd_stream", "HD head camera (SDK, H.264)",
-                handle >= 0 ? "open, waiting for frames" : "openStream failed");
+                handle >= 0 ? "open, waiting for frames" : "openStream failed: " + robot.hdError());
     }
 
     public byte[] configFrame() {
